@@ -1,0 +1,1 @@
+Sistema de Gestión de Alquiler de Vehículos. Para el frontend he usado Angular con la arquitectura standalone components. Para el backend se ha usado Java Spring Boot, comunicándose con el front a través de una API REST construida. Para la base de datos he usado JPA. Finalmente he encapsulado la aplicación web usando contenedores en docker.
