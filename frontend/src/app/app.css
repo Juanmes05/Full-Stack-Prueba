@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  background-color: white;
+  height: 80px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.logo {
+  margin-right: 40px;
+}
+
+.juan-logo {
+  font-size: 32px;
+  font-weight: 900;
+  font-style: italic;
+  border-bottom: 4px solid #ffcc00;
+  padding-bottom: 2px;
+  color: #000;
+}
+
+.nav-links {
+  display: flex;
+  height: 100%;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-links a:hover {
+  color: #000;
+}
+
+.nav-links a.active {
+  border-bottom: 3px solid #000;
+}
+
+.arrow {
+  font-size: 10px;
+  margin-left: 5px;
+  color: #666;
+}

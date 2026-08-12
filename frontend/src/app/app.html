@@ -1,0 +1,15 @@
+<header class="navbar">
+  <div class="logo">
+    <span class="juan-logo">JM5</span>
+  </div>
+  
+  <nav class="nav-links">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Alquila coches y furgonetas</a>
+    <a routerLink="/vehiculos" routerLinkActive="active">Añadir Vehículos</a>
+    <a routerLink="/lista-reservas" routerLinkActive="active">Reservas</a>
+  </nav>
+</header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>

@@ -1,0 +1,37 @@
+<div class="alert error" *ngIf="mensajeError" style="margin: 0; border-radius: 0;">
+  <strong>Error:</strong> {{ mensajeError }}
+  <button class="close-btn" (click)="mensajeError = null">X</button>
+</div>
+
+<div class="hero-section">
+  <h1 class="main-title">GESTIONAR RESERVAS</h1>
+
+  <div class="search-form-container">
+    <form [formGroup]="alquilerForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <select id="vehiculoId" formControlName="vehiculoId" class="full-width">
+          <option value="" disabled selected>Seleccione un vehículo...</option>
+          <option *ngFor="let v of vehiculos" [value]="v.id">
+            {{ v.matricula }} ({{ v.tipo }} - Cap: {{ v.capacidadMaxima }})
+          </option>
+        </select>
+
+        <input id="pasajerosPrevistos" type="number" formControlName="pasajerosPrevistos" placeholder="Número de pasajeros" class="full-width" min="1" />
+      </div>
+
+      <div class="form-row multi-col">
+        <!-- Truco: type="text" por defecto para que muestre el placeholder, cambia a datetime al hacer foco -->
+        <input id="fechaInicio" type="text" formControlName="fechaInicio" placeholder="Fecha y hora de inicio" 
+               (focus)="fInicio.type='datetime-local'" (blur)="!fInicio.value ? fInicio.type='text' : null" #fInicio>
+               
+        <input id="fechaFin" type="text" formControlName="fechaFin" placeholder="Fecha y hora de fin" 
+               (focus)="fFin.type='datetime-local'" (blur)="!fFin.value ? fFin.type='text' : null" #fFin>
+        
+        <button type="submit" class="btn-buscar" [disabled]="alquilerForm.invalid">
+          Crear Reserva
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

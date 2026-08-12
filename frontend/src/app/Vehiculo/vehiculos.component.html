@@ -1,0 +1,69 @@
+<div class="container">
+  <h2>Gestión de Vehículos</h2>
+  <div class="form-container">
+    <h3>Añadir Nuevo Vehículo</h3>
+    <form [formGroup]="vehiculoForm" (ngSubmit)="onSubmit()">
+      
+      <div>
+        <label for="matricula">Matrícula</label>
+        <input id="matricula" type="text" formControlName="matricula" placeholder="Ej: 1234ABC" />
+      </div>
+
+      <div>
+        <label for="tipo">Tipo de Vehículo</label>
+        <select id="tipo" formControlName="tipo">
+          <option value="TURISMO">Turismo</option>
+          <option value="FURGONETA">Furgoneta</option>
+          <option value="SUV">SUV</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="capacidadMaxima">Capacidad Max. (Pasajeros)</label>
+        <input id="capacidadMaxima" type="number" formControlName="capacidadMaxima" min="1" />
+      </div>
+
+      <div>
+        <label for="kilometrajeActual">Kilometraje Actual</label>
+        <input id="kilometrajeActual" type="number" formControlName="kilometrajeActual" min="0" />
+      </div>
+
+      <button type="submit" [disabled]="vehiculoForm.invalid">Guardar Vehículo</button>
+
+      <div class="alert error" *ngIf="mensajeError" style="margin: 0; border-radius: 0;">
+            <strong>Error:</strong> {{ mensajeError }}
+      <button class="close-btn" (click)="mensajeError = null">X</button>
+</div>
+    </form>
+    
+  </div>
+
+  <div class="list-container">
+    <h3>Flota Disponible</h3>
+    
+    <table *ngIf="vehiculos.length > 0; else sinVehiculos">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Matrícula</th>
+          <th>Tipo</th>
+          <th>Capacidad</th>
+          <th>Kilometraje</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of vehiculos">
+          <td>{{ v.id }}</td>
+          <td>{{ v.matricula }}</td>
+          <td>{{ v.tipo }}</td>
+          <td>{{ v.capacidadMaxima }}</td>
+          <td>{{ v.kilometrajeActual }} km</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #sinVehiculos>
+      <p>No hay vehículos registrados en la flota.</p>
+    </ng-template>
+  </div>
+</div>

@@ -1,0 +1,271 @@
+/* =========================================
+   CONTENEDOR PRINCIPAL Y TIPOGRAFÍA GLOBAL
+   ========================================= */
+.container {
+  max-width: 850px;
+  margin: 60px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #1a1a1a;
+}
+
+h2, h3 {
+  font-family: inherit;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #000;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 50px;
+  margin-top: 0;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 30px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+h3::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 20px;
+  background-color: #ffcc00;
+  border-radius: 2px;
+}
+
+/* =========================================
+   TARJETAS
+   ========================================= */
+.form-container, .list-container {
+  background-color: #ffffff;
+  padding: 45px;
+  margin-bottom: 50px;
+  border-radius: 12px; /* Esquinas suavemente redondeadas */
+  /* Sombra moderna multicapa (estilo Apple/Stripe) */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+              0 10px 15px -3px rgba(0, 0, 0, 0.02),
+              0 20px 25px -5px rgba(0, 0, 0, 0.01);
+  border: 1px solid #f0f0f0;
+}
+
+/* =========================================
+   FORMULARIO
+   ========================================= */
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+form > div {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #666;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  background-color: #f8fafc;
+  color: #0f172a;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: #ffcc00;
+  /* Resplandor amarillo sutil en lugar de un borde duro */
+  box-shadow: 0 0 0 4px rgba(255, 204, 0, 0.15); 
+}
+
+/* =========================================
+   BOTÓN PRINCIPAL
+   ========================================= */
+button[type="submit"] {
+  grid-column: 1 / -1;
+  background-color: #ffcc00;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 18px 20px;
+  font-size: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background-color: #f5c400;
+  /* El botón se eleva levemente al pasar el ratón */
+  transform: translateY(-2px); 
+  box-shadow: 0 8px 20px rgba(255, 204, 0, 0.3);
+}
+
+button[type="submit"]:active:not(:disabled) {
+  transform: translateY(0); /* Efecto de pulsación */
+}
+
+button[type="submit"]:disabled {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =========================================
+   TABLA
+   ========================================= */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 18px 15px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+th {
+  background-color: #ffffff;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+tr {
+  transition: background-color 0.2s ease;
+}
+
+tr:hover {
+  background-color: #f8fafc;
+}
+
+.btn-danger {
+  background-color: #fff;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #ef4444;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+p {
+  color: #64748b;
+  font-size: 15px;
+  text-align: center;
+  padding: 30px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* =========================================
+   ALERTA DE ERROR
+   ========================================= */
+.alert {
+  grid-column: 1 / -1; 
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 20px;
+  margin-top: 15px; 
+  margin-bottom: 5px;
+  border-radius: 8px; 
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left; 
+  animation: slideDown 0.3s ease-out; 
+}
+
+.alert.error {
+  background-color: #fef2f2; 
+  color: #991b1b; 
+  border: 1px solid #fecaca; 
+  border-left: 5px solid #ef4444; 
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1); 
+}
+
+.alert strong {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 8px;
+  color: #7f1d1d;
+  white-space: nowrap;
+}
+
+.close-btn {
+  margin-left: auto;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: none;
+  color: #991b1b;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 14px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.close-btn:hover {
+  background-color: rgba(239, 68, 68, 0.25);
+  color: #7f1d1d;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
