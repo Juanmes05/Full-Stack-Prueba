@@ -1,17 +1,35 @@
 package es.uma.alquiler.dtos;
 
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import es.uma.alquiler.entidades.Alquiler;
 import es.uma.alquiler.entidades.EstadoAlquiler;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 public class AlquilerDTO {
 
     private Long id;
+
+    @NotNull(message = "El número de pasajeros previstos es obligatorio.")
+    @Min(value = 1, message = "El número de pasajeros previstos debe ser al menos 1.")
     private Integer pasajerosPrevistos;
+
+    @NotNull(message = "La fecha y hora de inicio es obligatoria.")
     private LocalDateTime fechaInicio;
+
+    @NotNull(message = "La fecha y hora de fin es obligatoria.")
     private LocalDateTime fechaFin;
+
+    // Lo asigna siempre el servicio (R1); si llega en una petición se ignora
     private EstadoAlquiler estado;
+
     private Long vehiculoId;
+
+    // Solo informativo en las respuestas, para no tener que pedir el vehículo aparte
+    private VehiculoDTO vehiculo;
 
     public AlquilerDTO() {
     }
@@ -27,6 +45,18 @@ public class AlquilerDTO {
         return alquiler;
     }
 
+    /**
+     * Vehículo que se quiere alquilar: se acepta tanto {"vehiculoId": 1}
+     * como {"vehiculo": {"id": 1}}.
+     */
+    @JsonIgnore
+    public Long getVehiculoSolicitado() {
+        if (vehiculoId != null) {
+            return vehiculoId;
+        }
+        return vehiculo != null ? vehiculo.getId() : null;
+    }
+
     public static AlquilerDTO convertirADTO(Alquiler al) {
         AlquilerDTO dto = new AlquilerDTO();
         dto.setId(al.getId());
@@ -36,6 +66,7 @@ public class AlquilerDTO {
         dto.setEstado(al.getEstado());
         if (al.getVehiculo() != null) {
             dto.setVehiculoId(al.getVehiculo().getId());
+            dto.setVehiculo(VehiculoDTO.convertirADTO(al.getVehiculo()));
         }
         return dto;
     }
@@ -87,5 +118,13 @@ public class AlquilerDTO {
 
     public void setVehiculoId(Long vehiculoId) {
         this.vehiculoId = vehiculoId;
+    }
+
+    public VehiculoDTO getVehiculo() {
+        return vehiculo;
+    }
+
+    public void setVehiculo(VehiculoDTO vehiculo) {
+        this.vehiculo = vehiculo;
     }
 }

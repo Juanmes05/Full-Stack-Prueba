@@ -1,3 +1,8 @@
+# Despliegue completo en localhost:
+#   frontend -> http://localhost:8081
+#   backend  -> http://localhost:8080
+#   MySQL    -> localhost:3306
+# Uso (desde esta carpeta): docker compose up --build
 services:
   db:
     image: mysql:8.4.0
@@ -12,25 +17,23 @@ services:
       - datos:/var/lib/mysql
     restart: always
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cliente", "-pclpd"]
+      # Por TCP (127.0.0.1): el servidor temporal de la primera inicialización solo escucha por socket
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "cliente", "-pclpd"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 15s
+      retries: 10
+      start_period: 30s
 
   backend:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: ../backend
+      dockerfile: ../docker/Dockerfile.backend
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/cldb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: cliente
       SPRING_DATASOURCE_PASSWORD: clpd
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
       db:
         condition: service_healthy
@@ -39,9 +42,11 @@ services:
   frontend:
     build:
       context: ../frontend
-      dockerfile: Dockerfile
+      dockerfile: ../docker/Dockerfile.frontend
     ports:
-      - "8081:80" 
+      - "8081:80"
+    depends_on:
+      - backend
     restart: always
 
 volumes:

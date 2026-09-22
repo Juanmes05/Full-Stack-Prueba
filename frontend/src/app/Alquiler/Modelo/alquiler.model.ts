@@ -1,11 +1,13 @@
-import { Vehiculo } from '/Users/jmesa/Desktop/Pagina/frontend/src/app/Vehiculo/Modelos/vehiculo.model';
+import { Vehiculo } from '../../Vehiculo/Modelos/vehiculo.model';
+
+export type EstadoAlquiler = 'PENDIENTE' | 'CONFIRMADO' | 'CANCELADO';
 
 export interface Alquiler {
   id?: number;
-  fechaInicio: string; 
-  fechaFin: string; 
+  fechaInicio: string;
+  fechaFin: string;
   pasajerosPrevistos: number;
-  estado?: 'PENDIENTE' | 'CONFIRMADO' | 'CANCELADO';
-  vehiculoId?: number; 
+  estado?: EstadoAlquiler;
+  vehiculoId?: number;
   vehiculo?: Vehiculo;
 }

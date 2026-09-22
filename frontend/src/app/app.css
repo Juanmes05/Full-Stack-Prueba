@@ -1,58 +1,154 @@
-body {
-  margin: 0;
-  padding: 0;
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.navbar {
+main {
+  flex: 1;
+}
+
+/* =========================================
+   CABECERA
+   ========================================= */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: rgba(255, 255, 255, 0.82);
+  backdrop-filter: saturate(1.6) blur(14px);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  border-bottom: 1px solid rgba(17, 18, 20, 0.07);
+}
+
+.topbar-inner {
   display: flex;
   align-items: center;
-  padding: 0 40px;
-  background-color: white;
-  height: 80px;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  gap: 32px;
+  max-width: 1200px;
+  height: 70px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
-.logo {
-  margin-right: 40px;
-}
-
-.juan-logo {
-  font-size: 32px;
-  font-weight: 900;
-  font-style: italic;
-  border-bottom: 4px solid #ffcc00;
-  padding-bottom: 2px;
-  color: #000;
-}
-
-.nav-links {
+.brand {
   display: flex;
-  height: 100%;
+  align-items: center;
+  gap: 14px;
+  color: var(--tinta);
+  text-decoration: none;
 }
 
-.nav-links a {
-  text-decoration: none;
-  color: #1a1a1a;
+.brand-mark {
+  font-size: 28px;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  padding-bottom: 3px;
+  border-bottom: 4px solid var(--amarillo);
+}
+
+.brand-sub {
+  padding-left: 14px;
+  border-left: 1px solid var(--linea);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--texto-3);
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px;
+  border-radius: 14px;
+  background-color: var(--linea-2);
+}
+
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: var(--texto-2);
   font-size: 14px;
   font-weight: 600;
-  padding: 0 20px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.nav a:hover {
+  color: var(--texto);
+}
+
+.nav a.active {
+  background-color: var(--tinta);
+  color: #ffffff;
+  box-shadow: 0 6px 16px -8px rgba(17, 18, 20, 0.6);
+}
+
+.nav a.active app-icono {
+  color: var(--amarillo);
+}
+
+/* =========================================
+   PIE
+   ========================================= */
+.footer {
+  border-top: 1px solid var(--linea);
+  background-color: var(--superficie);
+}
+
+.footer-inner {
   display: flex;
   align-items: center;
-  border-bottom: 3px solid transparent;
-  transition: all 0.2s;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--texto-3);
+  font-size: 13px;
 }
 
-.nav-links a:hover {
-  color: #000;
+.brand-mark.pequeno {
+  font-size: 18px;
+  border-bottom-width: 3px;
+  color: var(--tinta);
 }
 
-.nav-links a.active {
-  border-bottom: 3px solid #000;
+@media (max-width: 860px) {
+  .brand-sub {
+    display: none;
+  }
+
+  .nav a span {
+    display: none;
+  }
+
+  .nav a {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
 }
 
-.arrow {
-  font-size: 10px;
-  margin-left: 5px;
-  color: #666;
+@media (max-width: 700px) {
+  .topbar-inner {
+    height: 62px;
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 20px 16px;
+  }
 }

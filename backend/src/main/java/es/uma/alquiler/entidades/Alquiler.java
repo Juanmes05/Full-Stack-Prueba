@@ -9,7 +9,7 @@ public class Alquiler {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Identificador numérico[cite: 1]
+    private Long id;
 
     @Column(name = "pasajeros_previstos", nullable = false)
     private Integer pasajerosPrevistos; 

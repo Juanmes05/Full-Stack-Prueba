@@ -2,13 +2,26 @@ package es.uma.alquiler.dtos;
 
 import es.uma.alquiler.entidades.TipoVehiculo;
 import es.uma.alquiler.entidades.Vehiculo;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class VehiculoDTO {
 
     private Long id;
+
+    @NotBlank(message = "La matrícula es obligatoria.")
     private String matricula;
+
+    @NotNull(message = "El tipo de vehículo es obligatorio (TURISMO, SUV o FURGONETA).")
     private TipoVehiculo tipo;
+
+    @NotNull(message = "La capacidad máxima es obligatoria.")
+    @Min(value = 1, message = "La capacidad máxima debe ser de al menos 1 pasajero.")
     private Integer capacidadMaxima;
+
+    @NotNull(message = "El kilometraje actual es obligatorio.")
+    @Min(value = 0, message = "El kilometraje debe ser un número mayor o igual que 0.")
     private Integer kilometrajeActual;
 
     public VehiculoDTO() {

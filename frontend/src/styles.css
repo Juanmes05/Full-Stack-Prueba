@@ -1,1 +1,703 @@
-/* You can add global styles to this file, and also import other style files */
+@import '@fontsource-variable/plus-jakarta-sans';
+
+/* =========================================
+   TOKENS
+   ========================================= */
+:root {
+  --amarillo: #ffcc00;
+  --amarillo-hover: #f2c200;
+  --amarillo-suave: #fff6d1;
+  --tinta: #111214;
+  --tinta-2: #26272c;
+  --texto: #18191c;
+  --texto-2: #55565e;
+  --texto-3: #8b8c93;
+  --linea: #e6e6e1;
+  --linea-2: #f0f0eb;
+  --fondo: #f6f6f2;
+  --superficie: #ffffff;
+  --superficie-2: #fafaf7;
+
+  --verde: #1d7a3e;
+  --verde-suave: #e7f5ec;
+  --ambar: #a85c07;
+  --ambar-suave: #fdf1d9;
+  --rojo: #c2382d;
+  --rojo-suave: #fdecea;
+
+  --radio-s: 10px;
+  --radio: 14px;
+  --radio-l: 22px;
+  --sombra-s: 0 1px 2px rgba(17, 18, 20, 0.05);
+  --sombra: 0 1px 2px rgba(17, 18, 20, 0.04), 0 14px 34px -18px rgba(17, 18, 20, 0.2);
+  --sombra-l: 0 36px 80px -32px rgba(17, 18, 20, 0.45);
+  --anillo: 0 0 0 4px rgba(255, 204, 0, 0.35);
+
+  --fuente: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* =========================================
+   BASE
+   ========================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--texto);
+  background-color: var(--fondo);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background-color: var(--amarillo);
+  color: var(--tinta);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================
+   PÁGINA Y CABECERAS
+   ========================================= */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--amarillo);
+}
+
+.page-title {
+  margin: 10px 0 8px;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.028em;
+}
+
+.page-subtitle {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--texto-2);
+  font-size: 16px;
+}
+
+/* =========================================
+   TARJETAS
+   ========================================= */
+.card {
+  background-color: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--linea-2);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.contador {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background-color: var(--linea-2);
+  color: var(--texto-2);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================
+   BOTONES
+   ========================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--anillo);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-primary {
+  background-color: var(--amarillo);
+  color: var(--tinta);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 10px 24px -12px rgba(230, 170, 0, 0.9);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--amarillo-hover);
+  transform: translateY(-1px);
+}
+
+.btn-dark {
+  background-color: var(--tinta);
+  color: #ffffff;
+}
+
+.btn-dark:hover:not(:disabled) {
+  background-color: var(--tinta-2);
+}
+
+.btn-ghost {
+  background-color: var(--superficie);
+  color: var(--texto);
+  border-color: var(--linea);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--superficie-2);
+  border-color: #d5d5cf;
+}
+
+.btn-success {
+  background-color: var(--verde-suave);
+  color: var(--verde);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #d3eddc;
+}
+
+.btn-danger {
+  background-color: transparent;
+  color: var(--rojo);
+  border-color: #f0d2ce;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--rojo-suave);
+}
+
+.btn-danger-solid {
+  background-color: var(--rojo);
+  color: #ffffff;
+}
+
+.btn-danger-solid:hover:not(:disabled) {
+  background-color: #a92f25;
+}
+
+.btn-sm {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+.btn-lg {
+  height: 54px;
+  padding: 0 26px;
+  font-size: 15px;
+  border-radius: 14px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+  background-color: transparent;
+  color: var(--texto-2);
+}
+
+.btn-icon:hover {
+  background-color: var(--linea-2);
+  color: var(--texto);
+}
+
+/* =========================================
+   CAMPOS DE FORMULARIO
+   ========================================= */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-2);
+}
+
+.input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  background-color: var(--superficie);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--texto);
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.input::placeholder {
+  color: var(--texto-3);
+  font-weight: 400;
+}
+
+.input:hover {
+  border-color: #d3d3cc;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--tinta);
+  box-shadow: var(--anillo);
+}
+
+select.input {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2355565e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+/* Control segmentado (radios con aspecto de pestañas) */
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background-color: var(--linea-2);
+}
+
+.segmented label {
+  flex: 1;
+  position: relative;
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-2);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.segmented span:hover {
+  color: var(--texto);
+}
+
+.segmented input:checked + span {
+  background-color: var(--superficie);
+  color: var(--texto);
+  box-shadow: 0 1px 3px rgba(17, 18, 20, 0.12);
+}
+
+.segmented input:focus-visible + span {
+  box-shadow: var(--anillo);
+}
+
+/* =========================================
+   TABLAS
+   ========================================= */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-3);
+  background-color: var(--superficie-2);
+  border-bottom: 1px solid var(--linea);
+  white-space: nowrap;
+}
+
+.tabla td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--linea-2);
+  vertical-align: middle;
+}
+
+.tabla tbody tr {
+  transition: background-color 0.15s;
+}
+
+.tabla tbody tr:hover {
+  background-color: var(--superficie-2);
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.celda-vehiculo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background-color: var(--amarillo-suave);
+  color: var(--tinta);
+}
+
+.celda-titulo {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.celda-sub {
+  display: block;
+  font-size: 12px;
+  color: var(--texto-3);
+}
+
+/* =========================================
+   ETIQUETAS
+   ========================================= */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background-color: var(--linea-2);
+  color: var(--texto-2);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chip-marca {
+  background-color: var(--tinta);
+  color: var(--amarillo);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chip-aviso {
+  background-color: var(--ambar-suave);
+  color: var(--ambar);
+}
+
+/* Estado de un alquiler */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 11px 0 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.estado::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.estado.pendiente { background-color: var(--ambar-suave); color: var(--ambar); }
+.estado.confirmado { background-color: var(--verde-suave); color: var(--verde); }
+.estado.cancelado { background-color: var(--rojo-suave); color: var(--rojo); }
+
+/* Matrícula con la franja del país en los colores de la marca */
+.plate {
+  display: inline-flex;
+  align-items: stretch;
+  height: 34px;
+  border: 1.5px solid var(--tinta);
+  border-radius: 7px;
+  background-color: #ffffff;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 31px;
+  font-variant-numeric: tabular-nums;
+}
+
+.plate-country {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 6px 3px;
+  margin-right: 10px;
+  background-color: var(--tinta);
+  color: var(--amarillo);
+  font-size: 10px;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.plate-text {
+  padding-right: 10px;
+}
+
+/* =========================================
+   ALERTAS
+   ========================================= */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  border: 1px solid;
+  border-radius: var(--radio);
+  font-size: 14px;
+  line-height: 1.5;
+  animation: aparecer 0.3s ease-out;
+}
+
+.alert > app-icono {
+  margin-top: 1px;
+}
+
+.alert-texto {
+  flex: 1;
+  padding-top: 1px;
+}
+
+.alert-texto strong {
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.alert-texto a {
+  color: inherit;
+  font-weight: 700;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+.alert.error {
+  background-color: var(--rojo-suave);
+  border-color: #f5d0cb;
+  color: #7c231b;
+}
+
+.alert.success {
+  background-color: var(--verde-suave);
+  border-color: #c9e7d3;
+  color: #14532d;
+}
+
+.close-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin: -3px 0 -3px auto;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.close-btn:hover {
+  opacity: 1;
+  background-color: rgba(17, 18, 20, 0.07);
+}
+
+/* =========================================
+   ESTADO VACÍO
+   ========================================= */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--texto-2);
+}
+
+.empty-icono {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 8px;
+  border-radius: 16px;
+  background-color: var(--linea-2);
+  color: var(--texto-2);
+}
+
+.empty-titulo {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.empty p {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 14px;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 32px 16px 64px;
+  }
+
+  .tabla th, .tabla td {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

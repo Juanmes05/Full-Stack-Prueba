@@ -3,19 +3,15 @@ package es.uma.alquiler.controladores;
 import java.net.URI;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import es.uma.alquiler.dtos.AlquilerDTO;
-import es.uma.alquiler.dtos.ErrorDTO;
 import es.uma.alquiler.entidades.Alquiler;
 import es.uma.alquiler.entidades.EstadoAlquiler;
 import es.uma.alquiler.servicios.LogicaAlquileres;
-import es.uma.alquiler.servicios.excepciones.ReglaNegocioException;
-import es.uma.alquiler.servicios.excepciones.VehiculoInexistenteException;
-import es.uma.alquiler.servicios.excepciones.AlquilerInexistenteException;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -29,49 +25,32 @@ public class AlquilerController {
     }
 
     @PostMapping
-    public ResponseEntity<AlquilerDTO> crearAlquiler(@RequestBody AlquilerDTO dto, UriComponentsBuilder uriBuilder) {
-        Alquiler entidad = dto.aEntidad();
-        
-        Alquiler guardado = servicio.aniadirAlquiler(entidad, dto.getVehiculoId());
-        
+    public ResponseEntity<AlquilerDTO> crearAlquiler(@Validated @RequestBody AlquilerDTO dto, UriComponentsBuilder uriBuilder) {
+        Alquiler guardado = servicio.aniadirAlquiler(dto.aEntidad(), dto.getVehiculoSolicitado());
+
         URI location = uriBuilder.path("/alquileres/{id}").buildAndExpand(guardado.getId()).toUri();
-        
+
         return ResponseEntity.created(location).body(AlquilerDTO.convertirADTO(guardado));
     }
 
     @GetMapping
     public List<AlquilerDTO> consultarAlquileres(@RequestParam(required = false) EstadoAlquiler estado) {
         List<Alquiler> lista = estado == null ? servicio.obtenerAlquileres() : servicio.obtenerAlquileresPorEstado(estado);
-        return lista.stream().map(al -> AlquilerDTO.convertirADTO(al)).toList();
+        return lista.stream().map(AlquilerDTO::convertirADTO).toList();
+    }
+
+    @GetMapping("/{id}")
+    public AlquilerDTO obtenerAlquiler(@PathVariable Long id) {
+        return AlquilerDTO.convertirADTO(servicio.obtenerAlquiler(id));
     }
 
     @PostMapping("/{id}/confirmar")
-    public void confirmarAlquiler(@PathVariable Long id) {
-        servicio.confirmarAlquiler(id);
+    public AlquilerDTO confirmarAlquiler(@PathVariable Long id) {
+        return AlquilerDTO.convertirADTO(servicio.confirmarAlquiler(id));
     }
 
     @PostMapping("/{id}/cancelar")
-    public void cancelarAlquiler(@PathVariable Long id) {
-        servicio.cancelarAlquiler(id);
-    }
-
-    @ExceptionHandler(ReglaNegocioException.class)
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    public ErrorDTO reglaNegocioViolada(ReglaNegocioException e) {
-        return new ErrorDTO(e.getMessage());
-    }
-    
-    @ExceptionHandler(AlquilerInexistenteException.class)
-    @ResponseStatus(code = HttpStatus.NOT_FOUND)
-    public ErrorDTO alquilerInexistente(AlquilerInexistenteException e) {
-        String mensaje = e.getMessage() != null ? e.getMessage() : "Alquiler no encontrado";
-        return new ErrorDTO(mensaje);
-    }
-    
-    @ExceptionHandler(VehiculoInexistenteException.class)
-    @ResponseStatus(code = HttpStatus.NOT_FOUND)
-    public ErrorDTO vehiculoNoEncontrado(VehiculoInexistenteException e) {
-        String mensaje = e.getMessage() != null ? e.getMessage() : "Vehículo no encontrado";
-        return new ErrorDTO(mensaje);
+    public AlquilerDTO cancelarAlquiler(@PathVariable Long id) {
+        return AlquilerDTO.convertirADTO(servicio.cancelarAlquiler(id));
     }
 }

@@ -1,0 +1,15 @@
+# Etapa 1: compila la aplicación Angular
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npx ng build --configuration production
+
+# Etapa 2: la sirve Apache
+FROM httpd:alpine
+RUN rm -rf /usr/local/apache2/htdocs/* \
+    # Las rutas de Angular (/vehiculos, /lista-reservas) se resuelven en el navegador
+    && echo "FallbackResource /index.html" >> /usr/local/apache2/conf/httpd.conf
+COPY --from=build /app/dist/frontend/browser/ /usr/local/apache2/htdocs/
+EXPOSE 80

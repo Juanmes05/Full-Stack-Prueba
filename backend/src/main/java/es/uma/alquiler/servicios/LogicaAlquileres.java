@@ -1,22 +1,20 @@
 package es.uma.alquiler.servicios;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.uma.alquiler.entidades.Alquiler;
 import es.uma.alquiler.entidades.EstadoAlquiler;
-import es.uma.alquiler.entidades.TipoVehiculo;
 import es.uma.alquiler.entidades.Vehiculo;
 import es.uma.alquiler.repositorios.AlquilerRepository;
 import es.uma.alquiler.repositorios.VehiculoRepository;
 import es.uma.alquiler.servicios.excepciones.AlquilerInexistenteException;
 import es.uma.alquiler.servicios.excepciones.ReglaNegocioException;
-import es.uma.alquiler.servicios.excepciones.VehiculoDuplicadoExcception;
 import es.uma.alquiler.servicios.excepciones.VehiculoInexistenteException;
 
 @Service
@@ -25,140 +23,109 @@ public class LogicaAlquileres {
 
     private final AlquilerRepository alquilerRepo;
     private final VehiculoRepository vehiculoRepo;
-    
-    @Autowired
-    public LogicaAlquileres(AlquilerRepository alquilerRepo, VehiculoRepository vehiculoRepo) {
+    private final ReglasAlquiler reglas;
+
+    public LogicaAlquileres(AlquilerRepository alquilerRepo, VehiculoRepository vehiculoRepo, ReglasAlquiler reglas) {
         this.alquilerRepo = alquilerRepo;
         this.vehiculoRepo = vehiculoRepo;
+        this.reglas = reglas;
     }
-    
 
+    @Transactional(readOnly = true)
     public List<Alquiler> obtenerAlquileres() {
-        return alquilerRepo.findAll();
+        return alquilerRepo.findAll(Sort.by("id"));
     }
-    
-    public List<Alquiler> obtenerAlquileresPorEstado(EstadoAlquiler estado){
-		return alquilerRepo.findByEstado(estado);
+
+    @Transactional(readOnly = true)
+    public List<Alquiler> obtenerAlquileresPorEstado(EstadoAlquiler estado) {
+        return alquilerRepo.findByEstadoOrderByIdAsc(estado);
     }
-    
+
+    @Transactional(readOnly = true)
     public Alquiler obtenerAlquiler(Long id) {
         return alquilerRepo.findById(id)
-                .orElseThrow(() -> new AlquilerInexistenteException());
+                .orElseThrow(() -> new AlquilerInexistenteException("No existe ningún alquiler con id " + id + "."));
     }
-    
+
+    @Transactional(readOnly = true)
+    public List<Alquiler> obtenerAlquileresPorVehiculo(Long vehiculoId) {
+        if (!vehiculoRepo.existsById(vehiculoId)) {
+            throw vehiculoInexistente(vehiculoId);
+        }
+        return alquilerRepo.findByVehiculoIdOrderByIdAsc(vehiculoId);
+    }
+
     public Alquiler aniadirAlquiler(Alquiler al, Long vehiculoId) {
-        Vehiculo ve = vehiculoRepo.findById(vehiculoId)
-                .orElseThrow(() -> new VehiculoInexistenteException("Vehículo no encontrado"));
-
-        // R2. Capacidad del vehículo
-        if (al.getPasajerosPrevistos() > ve.getCapacidadMaxima()) {
-            throw new ReglaNegocioException("Los pasajeros superan la capacidad máxima del vehículo.");
+        if (vehiculoId == null) {
+            throw new ReglaNegocioException("Debe indicarse el vehículo que se quiere alquilar.");
         }
+        Vehiculo ve = vehiculoRepo.findById(vehiculoId).orElseThrow(() -> vehiculoInexistente(vehiculoId));
 
-        // R3. Horario permitido
-        if (!al.getFechaFin().isAfter(al.getFechaInicio())) {
-            throw new ReglaNegocioException("La fecha de fin debe ser posterior a la fecha de inicio.");
-        }
-
-        long horasDuracion = Duration.between(al.getFechaInicio(), al.getFechaFin()).toHours();
-        long diasDuracion = Duration.between(al.getFechaInicio(), al.getFechaFin()).toDays();
-
-        if (ve.getTipo() == TipoVehiculo.FURGONETA) {
-            if (horasDuracion < 2) {
-                throw new ReglaNegocioException("Las furgonetas deben alquilarse un mínimo de dos horas.");
-            }
-        } else {
-            if (horasDuracion < 24) {
-                throw new ReglaNegocioException("Los alquileres deben tener una duración mínima de 24 horas.");
-            }
-        }
-
-        // R5. Duración máxima
-        if (diasDuracion > 5) {
-            throw new ReglaNegocioException("La duración de un alquiler no podrá superar los cinco días.");
-        }
-
-
-        if (ve.getTipo() == TipoVehiculo.FURGONETA && ve.getKilometrajeActual() > 150000) {
-            if (horasDuracion >= 6) {
-                throw new ReglaNegocioException("Furgoneta de alta rotación: no se puede alquilar 6 horas o más.");
-            }
-        }
-
-        if (ve.getKilometrajeActual() > 200000) {
-            if (al.getPasajerosPrevistos() > (ve.getCapacidadMaxima() / 2.0)) {
-                throw new ReglaNegocioException("Límite de carga: pasajeros no pueden superar el 50% de la capacidad.");
-            }
-        }
+        // R2, R3, R4, R5 y R8
+        reglas.validarNuevoAlquiler(ve, al.getPasajerosPrevistos(), al.getFechaInicio(), al.getFechaFin());
 
         // R1. Estado inicial
         al.setId(null);
         al.setVehiculo(ve);
         al.setEstado(EstadoAlquiler.PENDIENTE);
-        
         return alquilerRepo.save(al);
     }
 
-    public void confirmarAlquiler(Long id) {
-        Alquiler al = alquilerRepo.findById(id).orElseThrow(() -> new AlquilerInexistenteException(null));
-        
-        // R7. Cambio de estado
+    // READ_COMMITTED: tras esperar el bloqueo del vehículo, la consulta de solapamiento
+    // debe ver las confirmaciones que otras transacciones acaban de guardar
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Alquiler confirmarAlquiler(Long id) {
+        Alquiler al = obtenerAlquiler(id);
+
+        // R7. Cambio de estado: solo PENDIENTE -> CONFIRMADO
         if (al.getEstado() != EstadoAlquiler.PENDIENTE) {
-            throw new ReglaNegocioException("Solo se pueden confirmar alquileres en estado PENDIENTE.");
+            throw new ReglaNegocioException("Solo se pueden confirmar alquileres en estado PENDIENTE (el alquiler "
+                    + id + " está " + al.getEstado() + ").");
         }
-        
-        // R6. Solapamiento
-        if (alquilerRepo.existsOverlappingAlquileres(al.getVehiculo(), EstadoAlquiler.CONFIRMADO, al.getFechaInicio(), al.getFechaFin())) {
-            throw new ReglaNegocioException("Ya existe un alquiler confirmado que se solapa en fechas.");
+
+        Long vehiculoId = al.getVehiculo().getId();
+        Vehiculo ve = vehiculoRepo.findByIdParaActualizar(vehiculoId).orElseThrow(() -> vehiculoInexistente(vehiculoId));
+
+        // R8. El kilometraje puede haber cambiado desde que se creó el alquiler
+        reglas.validarKilometraje(ve, al.getPasajerosPrevistos(), al.getFechaInicio(), al.getFechaFin());
+
+        // R6. Solapamiento con otros alquileres confirmados
+        if (alquilerRepo.existeSolapamiento(vehiculoId, EstadoAlquiler.CONFIRMADO, al.getFechaInicio(), al.getFechaFin())) {
+            throw new ReglaNegocioException("El vehículo " + ve.getMatricula()
+                    + " ya tiene un alquiler confirmado que se solapa con estas fechas.");
         }
 
         al.setEstado(EstadoAlquiler.CONFIRMADO);
-        alquilerRepo.save(al);
+        return alquilerRepo.save(al);
     }
 
-    public void cancelarAlquiler(Long id) {
-        Alquiler al = alquilerRepo.findById(id).orElseThrow(() -> new AlquilerInexistenteException(null));
-        
-        // R7. Cambio de estado
+    public Alquiler cancelarAlquiler(Long id) {
+        Alquiler al = obtenerAlquiler(id);
+
+        // R7. Cambio de estado: PENDIENTE o CONFIRMADO -> CANCELADO
         if (al.getEstado() == EstadoAlquiler.CANCELADO) {
-            throw new ReglaNegocioException("Un alquiler CANCELADO no puede cambiarse de estado.");
+            throw new ReglaNegocioException("El alquiler " + id + " ya está CANCELADO y no puede cambiar de estado.");
         }
 
         al.setEstado(EstadoAlquiler.CANCELADO);
-        alquilerRepo.save(al);
-    }
-    
-
-    public List<Vehiculo> obtenerVehiculos() {
-        return vehiculoRepo.findAll();
+        return alquilerRepo.save(al);
     }
 
-    public Vehiculo obtenerVehiculo(Long id) {
-        return vehiculoRepo.findById(id)
-                .orElseThrow(() -> new VehiculoInexistenteException("Vehículo no encontrado"));
-    }
-
-    public Vehiculo aniadirVehiculo(Vehiculo ve) {
-    	if(vehiculoRepo.existsByMatricula(ve.getMatricula())) { throw new VehiculoDuplicadoExcception("Vehiculo existente");}
-        ve.setId(null);
-        return vehiculoRepo.save(ve);
-    }
-
-    public void actualizarKilometraje(Long id, Integer nuevoKilometraje) {
-        Vehiculo ve = obtenerVehiculo(id);
-        ve.setKilometrajeActual(nuevoKilometraje);
-        vehiculoRepo.save(ve);
-    }
-
-    public List<Alquiler> obtenerAlquileresPorVehiculo(Long vehiculoId) {
-        Vehiculo ve = obtenerVehiculo(vehiculoId); 
-        return alquilerRepo.findByVehiculoId(ve.getId());
-    }
-
+    /**
+     * Vehículos que pueden alquilarse en ese intervalo para ese número de pasajeros:
+     * los que cumplen las reglas de creación (R2, R4, R8) y no tienen alquileres
+     * confirmados que se solapen (R6), de modo que el alquiler podría confirmarse.
+     */
+    @Transactional(readOnly = true)
     public List<Vehiculo> obtenerVehiculosLibres(LocalDateTime inicio, LocalDateTime fin, Integer pasajeros) {
-        if (!fin.isAfter(inicio)) {
-            throw new ReglaNegocioException("El rango de fechas es inválido.");
-        }
-        return vehiculoRepo.findVehiculosLibres(inicio, fin, pasajeros);
+        reglas.validarPasajeros(pasajeros);
+        reglas.validarIntervalo(inicio, fin);
+        return vehiculoRepo.findVehiculosLibres(inicio, fin, pasajeros, EstadoAlquiler.CONFIRMADO).stream()
+                .filter(ve -> reglas.admiteAlquiler(ve, pasajeros, inicio, fin))
+                .toList();
+    }
+
+    private VehiculoInexistenteException vehiculoInexistente(Long id) {
+        return new VehiculoInexistenteException("No existe ningún vehículo con id " + id + ".");
     }
 }

@@ -1,15 +1,34 @@
-<header class="navbar">
-  <div class="logo">
-    <span class="juan-logo">JM5</span>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" routerLink="/" aria-label="JM5, ir al inicio">
+      <span class="brand-mark">JM5</span>
+      <span class="brand-sub">Flota corporativa</span>
+    </a>
+
+    <nav class="nav" aria-label="Principal">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" aria-label="Alquila coches y furgonetas">
+        <app-icono nombre="buscar" [tamano]="16" />
+        <span>Alquila coches y furgonetas</span>
+      </a>
+      <a routerLink="/vehiculos" routerLinkActive="active" aria-label="Vehículos">
+        <app-icono nombre="coche" [tamano]="16" />
+        <span>Vehículos</span>
+      </a>
+      <a routerLink="/lista-reservas" routerLinkActive="active" aria-label="Reservas">
+        <app-icono nombre="lista" [tamano]="16" />
+        <span>Reservas</span>
+      </a>
+    </nav>
   </div>
-  
-  <nav class="nav-links">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Alquila coches y furgonetas</a>
-    <a routerLink="/vehiculos" routerLinkActive="active">Añadir Vehículos</a>
-    <a routerLink="/lista-reservas" routerLinkActive="active">Reservas</a>
-  </nav>
 </header>
 
 <main>
   <router-outlet></router-outlet>
 </main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="brand-mark pequeno">JM5</span>
+    <span>Alquiler de vehículos para reuniones externas, reparto y asistencia técnica</span>
+  </div>
+</footer>

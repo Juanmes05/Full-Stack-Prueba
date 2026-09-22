@@ -1,89 +1,121 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { AlquilerService } from './Servicio/alquiler.service';
 import { VehiculoService } from '../Vehiculo/Servicios/vehiculo.service';
-import { Alquiler } from '../Alquiler/Modelo/alquiler.model';
-import { Vehiculo } from '../Vehiculo/Modelos/vehiculo.model';
+import { Alquiler } from './Modelo/alquiler.model';
+import { TIPOS_VEHICULO, TipoVehiculo, Vehiculo } from '../Vehiculo/Modelos/vehiculo.model';
+import { duracionLegible } from '../Compartido/formato';
+import { IconoComponent } from '../Compartido/icono.component';
+import { VehiculoIlustracionComponent } from '../Compartido/vehiculo-ilustracion.component';
+
+interface Busqueda {
+  inicio: string;
+  fin: string;
+  pasajeros: number;
+}
 
 @Component({
   selector: 'app-alquileres',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, IconoComponent, VehiculoIlustracionComponent],
   templateUrl: './alquileres.component.html',
   styleUrls: ['./alquileres.component.css']
 })
-export class AlquileresComponent implements OnInit {
-  alquileres: Alquiler[] = [];
-  vehiculos: Vehiculo[] = [];
+export class AlquileresComponent {
+  readonly tipos = TIPOS_VEHICULO;
+  readonly duracion = duracionLegible;
+
   alquilerForm: FormGroup;
-  mensajeError: string | null = null;
+
+  // null mientras no se ha hecho ninguna búsqueda
+  vehiculosLibres = signal<Vehiculo[] | null>(null);
+  busqueda = signal<Busqueda | null>(null);
+  filtroTipo = signal<TipoVehiculo | ''>('');
+  buscando = signal(false);
+  reservandoId = signal<number | null>(null);
+  reservaCreada = signal<Alquiler | null>(null);
+  mensajeError = signal<string | null>(null);
+
+  vehiculosFiltrados = computed(() => {
+    const tipo = this.filtroTipo();
+    const libres = this.vehiculosLibres() ?? [];
+    return tipo ? libres.filter(v => v.tipo === tipo) : libres;
+  });
 
   constructor(
     private alquilerService: AlquilerService,
     private vehiculoService: VehiculoService,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private fb: FormBuilder
   ) {
     this.alquilerForm = this.fb.group({
-      vehiculoId: ['', Validators.required],
       fechaInicio: ['', Validators.required],
       fechaFin: ['', Validators.required],
-      pasajerosPrevistos: ['', [Validators.required, Validators.min(1)]]
-    });
-  }
-
-  ngOnInit(): void {
-    this.cargarDatos();
-  }
-
-  cargarDatos(): void {
-    this.alquilerService.getAlquileres().subscribe({
-      next: (data) => {
-        this.alquileres = data;
-        this.cdr.detectChanges();
-      }
+      pasajerosPrevistos: ['', [Validators.required, Validators.min(1)]],
+      tipo: ['']
     });
 
-    this.vehiculoService.getVehiculos().subscribe({
-      next: (data) => {
-        this.vehiculos = data;
-        this.cdr.detectChanges();
-      }
-    });
+    this.alquilerForm.get('tipo')!.valueChanges.subscribe(tipo => this.filtroTipo.set(tipo ?? ''));
   }
 
   onSubmit(): void {
-    if (this.alquilerForm.valid) {
-      this.mensajeError = null;
-      const nuevoAlquiler: Alquiler = this.alquilerForm.value;
-      
-      this.alquilerService.crearAlquiler(nuevoAlquiler).subscribe({
-        next: () => {
-          this.cargarDatos();
-          this.alquilerForm.reset({ vehiculoId: '', pasajerosPrevistos: '' });
-        },
-        error: (err) => {
-          this.mensajeError = err.message;
-          this.cdr.detectChanges();
-        }
-      });
+    if (this.alquilerForm.invalid) {
+      return;
     }
-  }
 
-  cambiarEstado(id: number | undefined, accion: 'confirmar' | 'cancelar'): void {
-    if (!id) return;
-    
-    const request = accion === 'confirmar' 
-      ? this.alquilerService.confirmarAlquiler(id)
-      : this.alquilerService.cancelarAlquiler(id);
+    const { fechaInicio, fechaFin, pasajerosPrevistos } = this.alquilerForm.value;
+    const busqueda: Busqueda = { inicio: fechaInicio, fin: fechaFin, pasajeros: Number(pasajerosPrevistos) };
 
-    request.subscribe({
-      next: () => this.cargarDatos(),
+    this.mensajeError.set(null);
+    this.reservaCreada.set(null);
+    this.buscando.set(true);
+
+    this.vehiculoService.getVehiculosLibres(busqueda.inicio, busqueda.fin, busqueda.pasajeros).subscribe({
+      next: (data) => {
+        this.busqueda.set(busqueda);
+        this.vehiculosLibres.set(data);
+        this.buscando.set(false);
+      },
       error: (err) => {
-        this.mensajeError = err.message;
-        this.cdr.detectChanges();
+        this.busqueda.set(null);
+        this.vehiculosLibres.set(null);
+        this.mensajeError.set(err.message);
+        this.buscando.set(false);
       }
     });
+  }
+
+  reservar(vehiculo: Vehiculo): void {
+    const busqueda = this.busqueda();
+    if (!busqueda || vehiculo.id === undefined) {
+      return;
+    }
+
+    const nuevoAlquiler: Alquiler = {
+      vehiculoId: vehiculo.id,
+      pasajerosPrevistos: busqueda.pasajeros,
+      fechaInicio: busqueda.inicio,
+      fechaFin: busqueda.fin
+    };
+
+    this.mensajeError.set(null);
+    this.reservaCreada.set(null);
+    this.reservandoId.set(vehiculo.id);
+
+    this.alquilerService.crearAlquiler(nuevoAlquiler).subscribe({
+      next: (alquiler) => {
+        this.reservaCreada.set(alquiler);
+        this.reservandoId.set(null);
+      },
+      error: (err) => {
+        this.mensajeError.set(err.message);
+        this.reservandoId.set(null);
+      }
+    });
+  }
+
+  nombreTipo(tipo: TipoVehiculo): string {
+    return this.tipos.find(t => t.valor === tipo)?.nombre ?? tipo;
   }
 }

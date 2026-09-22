@@ -1,87 +1,185 @@
+.page > .alert {
+  margin-bottom: 16px;
+}
+
 /* =========================================
-   CONTENEDOR INFERIOR
+   FILTROS POR ESTADO
    ========================================= */
-.container {
-  max-width: 1200px;
-  margin: 40px auto;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: #1a1a1a;
-  padding: 0 20px;
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 13px;
+  background-color: var(--linea-2);
 }
 
-.list-container {
-  background-color: #ffffff;
-  padding: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border-top: 5px solid #000;
+.filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px 0 14px;
+  border: none;
+  border-radius: 10px;
+  background-color: transparent;
+  color: var(--texto-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
-h3 {
-  font-size: 20px;
-  font-weight: 900;
-  text-transform: uppercase;
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #000;
+.filters button:hover {
+  color: var(--texto);
+}
+
+.filters button.active {
+  background-color: var(--superficie);
+  color: var(--texto);
+  box-shadow: 0 1px 3px rgba(17, 18, 20, 0.12);
+}
+
+.filters button:focus-visible {
+  outline: none;
+  box-shadow: var(--anillo);
+}
+
+.filtro-num {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background-color: rgba(17, 18, 20, 0.06);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.filters button.active .filtro-num {
+  background-color: var(--tinta);
+  color: var(--amarillo);
 }
 
 /* =========================================
    TABLA
    ========================================= */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
+.celda-id {
+  color: var(--texto-3);
+  font-weight: 600;
 }
 
-th, td {
-  padding: 15px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+.periodo-fechas {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-th {
-  background-color: #000;
-  color: #ffcc00;
-  font-weight: 900;
-  text-transform: uppercase;
+.periodo-fechas app-icono {
+  color: var(--texto-3);
+}
+
+.pasajeros {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.pasajeros app-icono {
+  color: var(--texto-3);
+}
+
+.th-acciones {
+  text-align: right;
+}
+
+.action-buttons {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.action-buttons .btn + .btn {
+  margin-left: 6px;
+}
+
+.pregunta {
+  margin-right: 10px;
+  color: var(--rojo);
   font-size: 13px;
-  letter-spacing: 0.05em;
+  font-weight: 700;
 }
 
-tr:hover {
-  background-color: #fafafa;
+.cargando {
+  margin: 0;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--texto-3);
 }
 
-/* =========================================
-   BOTONES DE TABLA Y ETIQUETAS
-   ========================================= */
-.action-buttons button {
-  width: auto;
-  padding: 8px 15px;
-  font-size: 12px;
-  margin-right: 5px;
-  margin-top: 0;
-  font-weight: bold;
-  text-transform: uppercase;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  border: none;
-  cursor: pointer;
+.empty .btn {
+  margin-top: 14px;
 }
 
-.btn-success { background-color: #2b762c; color: white;}
-.btn-success:hover { background-color: #333; }
-.btn-danger { background-color: #e74c3c; color: white; }
-.btn-danger:hover { background-color: #c0392b; }
+@media (max-width: 760px) {
+  .tabla thead {
+    display: none;
+  }
 
-.badge {
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 900;
-  color: white;
-  text-transform: uppercase;
+  .tabla, .tabla tbody {
+    display: block;
+  }
+
+  .tabla tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--linea-2);
+  }
+
+  .tabla tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .tabla td {
+    padding: 0;
+    border: none;
+  }
+
+  .td-vehiculo { grid-column: 1; grid-row: 1; }
+  .celda-id { grid-column: 2; grid-row: 1; text-align: right; }
+  .td-periodo { grid-column: 1 / -1; }
+  .td-pasajeros { grid-column: 1; }
+  .td-estado { grid-column: 2; text-align: right; }
+
+  .action-buttons {
+    grid-column: 1 / -1;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .action-buttons:empty {
+    display: none;
+  }
+
+  .pregunta {
+    display: block;
+    margin-bottom: 8px;
+  }
 }
 
-.badge.pendiente { background-color: #f39c12; }
-.badge.confirmado { background-color: #2b762c; color: #f39c12;}
-.badge.cancelado { background-color: #e74c3c; }
+@media (max-width: 700px) {
+  .page-header .btn {
+    width: 100%;
+  }
+
+  .card-head {
+    padding: 16px;
+  }
+}

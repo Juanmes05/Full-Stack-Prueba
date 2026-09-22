@@ -1,37 +1,151 @@
-<div class="alert error" *ngIf="mensajeError" style="margin: 0; border-radius: 0;">
-  <strong>Error:</strong> {{ mensajeError }}
-  <button class="close-btn" (click)="mensajeError = null">X</button>
-</div>
-
-<div class="hero-section">
-  <h1 class="main-title">GESTIONAR RESERVAS</h1>
-
-  <div class="search-form-container">
-    <form [formGroup]="alquilerForm" (ngSubmit)="onSubmit()">
-      <div class="form-row">
-        <select id="vehiculoId" formControlName="vehiculoId" class="full-width">
-          <option value="" disabled selected>Seleccione un vehículo...</option>
-          <option *ngFor="let v of vehiculos" [value]="v.id">
-            {{ v.matricula }} ({{ v.tipo }} - Cap: {{ v.capacidadMaxima }})
-          </option>
-        </select>
-
-        <input id="pasajerosPrevistos" type="number" formControlName="pasajerosPrevistos" placeholder="Número de pasajeros" class="full-width" min="1" />
-      </div>
-
-      <div class="form-row multi-col">
-        <!-- Truco: type="text" por defecto para que muestre el placeholder, cambia a datetime al hacer foco -->
-        <input id="fechaInicio" type="text" formControlName="fechaInicio" placeholder="Fecha y hora de inicio" 
-               (focus)="fInicio.type='datetime-local'" (blur)="!fInicio.value ? fInicio.type='text' : null" #fInicio>
-               
-        <input id="fechaFin" type="text" formControlName="fechaFin" placeholder="Fecha y hora de fin" 
-               (focus)="fFin.type='datetime-local'" (blur)="!fFin.value ? fFin.type='text' : null" #fFin>
-        
-        <button type="submit" class="btn-buscar" [disabled]="alquilerForm.invalid">
-          Crear Reserva
-        </button>
-      </div>
-
-    </form>
+<section class="hero">
+  <div class="hero-inner">
+    <span class="hero-chip"><span class="punto"></span>Flota corporativa JM5</span>
+    <h1 class="hero-title">Alquila coches<br>y <span class="acento">furgonetas</span></h1>
+    <p class="hero-lead">
+      Consulta qué vehículos están libres para tus reuniones, repartos o asistencias técnicas
+      y resérvalo al momento.
+    </p>
   </div>
-</div>
+</section>
+
+<section class="buscador">
+  <form class="search-card" [formGroup]="alquilerForm" (ngSubmit)="onSubmit()">
+    <label class="field">
+      <span class="field-label"><app-icono nombre="calendario" [tamano]="15" /> Recogida</span>
+      <input id="fechaInicio" class="input" type="datetime-local" formControlName="fechaInicio" />
+    </label>
+
+    <label class="field">
+      <span class="field-label"><app-icono nombre="calendario" [tamano]="15" /> Devolución</span>
+      <input id="fechaFin" class="input" type="datetime-local" formControlName="fechaFin" />
+    </label>
+
+    <label class="field campo-corto">
+      <span class="field-label"><app-icono nombre="personas" [tamano]="15" /> Pasajeros</span>
+      <input id="pasajerosPrevistos" class="input" type="number" min="1" placeholder="Nº de personas"
+             formControlName="pasajerosPrevistos" />
+    </label>
+
+    <label class="field">
+      <span class="field-label"><app-icono nombre="coche" [tamano]="15" /> Tipo</span>
+      <select id="tipo" class="input" formControlName="tipo">
+        <option value="">Todos</option>
+        @for (t of tipos; track t.valor) {
+          <option [value]="t.valor">{{ t.nombre }}</option>
+        }
+      </select>
+    </label>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-buscar" [disabled]="alquilerForm.invalid || buscando()">
+      <app-icono nombre="buscar" [tamano]="18" [grosor]="2.4" />
+      {{ buscando() ? 'Buscando…' : 'Buscar' }}
+    </button>
+  </form>
+
+  <ul class="condiciones">
+    <li><app-icono nombre="reloj" [tamano]="16" /> Mínimo 24 horas · furgonetas desde 2 horas</li>
+    <li><app-icono nombre="calendario" [tamano]="16" /> Máximo 5 días por alquiler</li>
+    <li><app-icono nombre="ok" [tamano]="16" /> La reserva se confirma después desde Reservas</li>
+  </ul>
+</section>
+
+<section class="resultados">
+  @if (mensajeError()) {
+    <div class="alert error" role="alert">
+      <app-icono nombre="alerta" [tamano]="20" />
+      <div class="alert-texto"><strong>No se ha podido completar.</strong> {{ mensajeError() }}</div>
+      <button type="button" class="close-btn" (click)="mensajeError.set(null)" aria-label="Cerrar">
+        <app-icono nombre="cerrar" [tamano]="16" />
+      </button>
+    </div>
+  }
+
+  @if (reservaCreada(); as reserva) {
+    <div class="alert success" role="status">
+      <app-icono nombre="ok" [tamano]="20" />
+      <div class="alert-texto">
+        <strong>Reserva #{{ reserva.id }} creada.</strong>
+        {{ reserva.vehiculo?.matricula }} del {{ reserva.fechaInicio | date:'d MMM, HH:mm' }}
+        al {{ reserva.fechaFin | date:'d MMM, HH:mm' }}. Queda pendiente de confirmar.
+        <a routerLink="/lista-reservas">Ver reservas →</a>
+      </div>
+      <button type="button" class="close-btn" (click)="reservaCreada.set(null)" aria-label="Cerrar">
+        <app-icono nombre="cerrar" [tamano]="16" />
+      </button>
+    </div>
+  }
+
+  @if (busqueda(); as b) {
+    <div class="resultados-cabecera">
+      <div>
+        <span class="eyebrow">Disponibilidad</span>
+        <h2 class="resultados-titulo">
+          Vehículos disponibles <span class="contador">{{ vehiculosFiltrados().length }}</span>
+        </h2>
+      </div>
+      <div class="resumen">
+        <span class="chip"><app-icono nombre="calendario" [tamano]="14" />
+          {{ b.inicio | date:'d MMM, HH:mm' }} → {{ b.fin | date:'d MMM, HH:mm' }}</span>
+        <span class="chip"><app-icono nombre="reloj" [tamano]="14" /> {{ duracion(b.inicio, b.fin) }}</span>
+        <span class="chip"><app-icono nombre="personas" [tamano]="14" />
+          {{ b.pasajeros }} {{ b.pasajeros === 1 ? 'pasajero' : 'pasajeros' }}</span>
+      </div>
+    </div>
+
+    @if (vehiculosFiltrados().length > 0) {
+      <div class="grid">
+        @for (v of vehiculosFiltrados(); track v.id) {
+          <article class="car-card">
+            <div class="car-media">
+              <span class="chip chip-marca">{{ nombreTipo(v.tipo) }}</span>
+              <app-vehiculo-ilustracion [tipo]="v.tipo" />
+            </div>
+
+            <div class="car-body">
+              <div class="car-title">
+                <span class="plate"><span class="plate-country">E</span><span class="plate-text">{{ v.matricula }}</span></span>
+                <span class="car-id">Nº {{ v.id }}</span>
+              </div>
+
+              <dl class="specs">
+                <div>
+                  <dt><app-icono nombre="personas" [tamano]="15" /> Plazas</dt>
+                  <dd>{{ v.capacidadMaxima }}</dd>
+                </div>
+                <div>
+                  <dt><app-icono nombre="cuentakm" [tamano]="15" /> Kilometraje</dt>
+                  <dd class="tabular">{{ v.kilometrajeActual | number }} km</dd>
+                </div>
+              </dl>
+
+              <button type="button" class="btn btn-dark btn-block btn-reservar" (click)="reservar(v)"
+                      [disabled]="reservandoId() !== null">
+                @if (reservandoId() === v.id) {
+                  Reservando…
+                } @else {
+                  Reservar <app-icono nombre="flecha" [tamano]="16" />
+                }
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="card empty">
+        <span class="empty-icono"><app-icono nombre="coche" [tamano]="24" /></span>
+        <p class="empty-titulo">No hay vehículos disponibles</p>
+        <p>
+          Ningún vehículo{{ filtroTipo() ? ' de ese tipo' : '' }} cumple las condiciones para esas fechas y pasajeros.
+          Prueba con otro intervalo o con menos pasajeros.
+        </p>
+      </div>
+    }
+  } @else if (!mensajeError()) {
+    <div class="card empty">
+      <span class="empty-icono"><app-icono nombre="buscar" [tamano]="24" /></span>
+      <p class="empty-titulo">Encuentra tu vehículo</p>
+      <p>Indica cuándo lo recoges, cuándo lo devuelves y cuántas personas viajan para ver la flota disponible.</p>
+    </div>
+  }
+</section>

@@ -1,54 +1,134 @@
-<div class="container">
-  <div class="alert error" *ngIf="mensajeError" style="margin-bottom: 20px; border-radius: 4px;">
-    <strong>Error:</strong> {{ mensajeError }}
-    <button class="close-btn" (click)="mensajeError = null">X</button>
-  </div>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Reservas</span>
+      <h1 class="page-title">Alquileres del sistema</h1>
+      <p class="page-subtitle">
+        Confirma o cancela las reservas. Una reserva cancelada ya no puede cambiar de estado.
+      </p>
+    </div>
+    <a class="btn btn-primary btn-lg" routerLink="/">
+      <app-icono nombre="mas" [tamano]="18" [grosor]="2.4" /> Nueva reserva
+    </a>
+  </header>
 
-  <div class="list-container">
-    <h3>Listado de Reservas Actuales</h3>
-    
-    <table *ngIf="alquileres.length > 0; else sinAlquileres">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Vehículo</th>
-          <th>Inicio</th>
-          <th>Fin</th>
-          <th>Pasajeros</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let a of alquileres">
-          <td>{{ a.id }}</td>
-          <td>{{ a.vehiculo?.matricula }}</td>
-          <td>{{ a.fechaInicio | date:'short' }}</td>
-          <td>{{ a.fechaFin | date:'short' }}</td>
-          <td>{{ a.pasajerosPrevistos }}</td>
-          <td>
-            <span class="badge" [ngClass]="a.estado?.toLowerCase() || ''">
-              {{ a.estado }}
-            </span>
-          </td>
-          <td class="action-buttons">
-            <button *ngIf="a.estado === 'PENDIENTE'" 
-                    class="btn-success" 
-                    (click)="cambiarEstado(a.id, 'confirmar')">
-              Confirmar
-            </button>
-            <button *ngIf="a.estado === 'PENDIENTE' || a.estado === 'CONFIRMADO'" 
-                    class="btn-danger" 
-                    (click)="cambiarEstado(a.id, 'cancelar')">
-              Cancelar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  @if (mensajeError()) {
+    <div class="alert error" role="alert">
+      <app-icono nombre="alerta" [tamano]="20" />
+      <div class="alert-texto"><strong>No se ha podido completar.</strong> {{ mensajeError() }}</div>
+      <button type="button" class="close-btn" (click)="mensajeError.set(null)" aria-label="Cerrar">
+        <app-icono nombre="cerrar" [tamano]="16" />
+      </button>
+    </div>
+  }
 
-    <ng-template #sinAlquileres>
-      <p>No hay alquileres registrados en el sistema en este momento.</p>
-    </ng-template>
-  </div>
+  @if (mensajeExito()) {
+    <div class="alert success" role="status">
+      <app-icono nombre="ok" [tamano]="20" />
+      <div class="alert-texto">{{ mensajeExito() }}</div>
+      <button type="button" class="close-btn" (click)="mensajeExito.set(null)" aria-label="Cerrar">
+        <app-icono nombre="cerrar" [tamano]="16" />
+      </button>
+    </div>
+  }
+
+  <section class="card">
+    <div class="card-head">
+      <div class="filters" role="group" aria-label="Filtrar por estado">
+        @for (f of filtros; track f.nombre) {
+          <button type="button" [class.active]="estadoFiltro() === f.estado" [attr.aria-pressed]="estadoFiltro() === f.estado"
+                  (click)="filtrar(f.estado)">
+            {{ f.nombre }} <span class="filtro-num">{{ contador(f.estado) }}</span>
+          </button>
+        }
+      </div>
+
+      <button type="button" class="btn btn-ghost btn-sm" (click)="cargarDatos()" [disabled]="cargando()">
+        <app-icono nombre="actualizar" [tamano]="15" /> Actualizar
+      </button>
+    </div>
+
+    @if (cargando() && alquileres().length === 0) {
+      <p class="cargando">Cargando reservas…</p>
+    } @else if (alquileres().length > 0) {
+      <div class="table-scroll">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Reserva</th>
+              <th>Vehículo</th>
+              <th>Periodo</th>
+              <th>Pasajeros</th>
+              <th>Estado</th>
+              <th class="th-acciones">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of alquileres(); track a.id) {
+              <tr>
+                <td class="celda-id">#{{ a.id }}</td>
+                <td class="td-vehiculo">
+                  <div class="celda-vehiculo">
+                    <span class="avatar"><app-icono [nombre]="a.vehiculo?.tipo === 'FURGONETA' ? 'furgoneta' : 'coche'" [tamano]="18" /></span>
+                    <div>
+                      <span class="celda-titulo">{{ a.vehiculo?.matricula }}</span>
+                      <span class="celda-sub">{{ nombreTipo(a.vehiculo?.tipo) }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="td-periodo">
+                  <div class="periodo">
+                    <span class="periodo-fechas">
+                      {{ a.fechaInicio | date:'d MMM, HH:mm' }}
+                      <app-icono nombre="flecha" [tamano]="13" />
+                      {{ a.fechaFin | date:'d MMM, HH:mm' }}
+                    </span>
+                    <span class="celda-sub">{{ a.fechaInicio | date:'yyyy' }} · {{ duracion(a.fechaInicio, a.fechaFin) }}</span>
+                  </div>
+                </td>
+                <td class="td-pasajeros">
+                  <span class="pasajeros"><app-icono nombre="personas" [tamano]="15" /> {{ a.pasajerosPrevistos }}</span>
+                </td>
+                <td class="td-estado">
+                  <span class="estado" [ngClass]="a.estado?.toLowerCase() || ''">{{ a.estado | titlecase }}</span>
+                </td>
+                <td class="action-buttons">
+                  @if (cancelandoId() === a.id) {
+                    <span class="pregunta">¿Cancelar la reserva?</span>
+                    <button type="button" class="btn btn-danger-solid btn-sm" (click)="cambiarEstado(a.id, 'cancelar')">Sí, cancelar</button>
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="cancelandoId.set(null)">No</button>
+                  } @else {
+                    @if (a.estado === 'PENDIENTE') {
+                      <button type="button" class="btn btn-success btn-sm" [disabled]="procesandoId() === a.id"
+                              (click)="cambiarEstado(a.id, 'confirmar')">
+                        <app-icono nombre="check" [tamano]="15" [grosor]="2.4" /> Confirmar
+                      </button>
+                    }
+                    @if (a.estado === 'PENDIENTE' || a.estado === 'CONFIRMADO') {
+                      <button type="button" class="btn btn-danger btn-sm" [disabled]="procesandoId() === a.id"
+                              (click)="cancelandoId.set(a.id ?? null)">
+                        Cancelar
+                      </button>
+                    }
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty">
+        <span class="empty-icono"><app-icono nombre="bandeja" [tamano]="24" /></span>
+        @if (estadoFiltro()) {
+          <p class="empty-titulo">Sin reservas {{ nombreFiltroActual() | lowercase }}</p>
+          <p>No hay ninguna reserva en este estado.</p>
+        } @else {
+          <p class="empty-titulo">Todavía no hay reservas</p>
+          <p>Cuando alquiles un vehículo aparecerá aquí para confirmarlo o cancelarlo.</p>
+          <a class="btn btn-dark" routerLink="/">Alquila un vehículo <app-icono nombre="flecha" [tamano]="16" /></a>
+        }
+      </div>
+    }
+  </section>
 </div>
